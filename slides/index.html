@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VCN #32 — Trading agents on superhero.com</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-card: #131829;
+    --bg-code: #161b2e;
+    --fg: #f5f5f0;
+    --fg-mute: #8b93a7;
+    --orange: #ff5722;
+    --cyan: #00d4ff;
+    --green: #6ee7b7;
+    --red: #ff6b6b;
+    --border: #232a44;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    overflow: hidden;
+  }
+  #deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 8vw;
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+  h1 {
+    font-size: 5.5vw;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  h2 {
+    font-size: 3.6vw;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 3vh;
+  }
+  h3 {
+    font-size: 2vw;
+    font-weight: 600;
+    color: var(--cyan);
+    margin-bottom: 1vh;
+    letter-spacing: -0.01em;
+  }
+  p, li {
+    font-size: 1.7vw;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .muted { color: var(--fg-mute); }
+  .orange { color: var(--orange); }
+  .cyan { color: var(--cyan); }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  ul { list-style: none; }
+  li {
+    margin: 0.8vh 0;
+    padding-left: 2.2vw;
+    position: relative;
+  }
+  li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-weight: 700;
+  }
+  code, pre {
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    font-size: 1.4vw;
+  }
+  code {
+    background: var(--bg-code);
+    color: var(--cyan);
+    padding: 0.2em 0.5em;
+    border-radius: 0.3em;
+    border: 1px solid var(--border);
+  }
+  pre {
+    background: var(--bg-code);
+    color: var(--fg);
+    padding: 2.5vh 2vw;
+    border-radius: 0.6vw;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    font-size: 1.3vw;
+    line-height: 1.5;
+    margin: 1.5vh 0;
+  }
+  pre .cmt { color: var(--fg-mute); }
+  pre .key { color: var(--orange); }
+  pre .str { color: var(--green); }
+  .grid {
+    display: grid;
+    gap: 2vw;
+    margin-top: 2vh;
+  }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1vw;
+    padding: 3vh 2vw;
+  }
+  .card.accent { border-color: var(--orange); }
+  .card.cyan { border-color: var(--cyan); }
+  .card h3 { font-size: 1.7vw; margin-bottom: 1.5vh; }
+  .card p, .card li { font-size: 1.2vw; }
+  .badge {
+    display: inline-block;
+    background: var(--orange);
+    color: var(--bg);
+    font-size: 1.1vw;
+    font-weight: 700;
+    padding: 0.3vh 0.8vw;
+    border-radius: 0.3vw;
+    margin-bottom: 1.5vh;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge.cyan { background: var(--cyan); }
+  .stat {
+    font-size: 5vw;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--orange);
+    letter-spacing: -0.03em;
+  }
+  .stat-label {
+    font-size: 1.3vw;
+    color: var(--fg-mute);
+    margin-top: 0.5vh;
+  }
+  .footer {
+    position: fixed;
+    bottom: 1.5vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 3vw;
+    font-size: 1vw;
+    color: var(--fg-mute);
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 10;
+  }
+  .progress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--orange);
+    transition: width 220ms ease;
+    z-index: 11;
+  }
+  .center { text-align: center; align-items: center; }
+  .center h1, .center h2, .center p { text-align: center; }
+  .big-list li { font-size: 2vw; margin: 1.5vh 0; }
+  .step-num {
+    display: inline-block;
+    width: 4vw;
+    height: 4vw;
+    line-height: 4vw;
+    text-align: center;
+    background: var(--orange);
+    color: var(--bg);
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 2vw;
+    margin-right: 1vw;
+    vertical-align: middle;
+  }
+  .kbd {
+    display: inline-block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-bottom-width: 3px;
+    border-radius: 0.3vw;
+    padding: 0.2vh 0.6vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9vw;
+  }
+  .speaker {
+    display: none;
+    position: fixed;
+    bottom: 4vh;
+    left: 4vw;
+    right: 4vw;
+    background: rgba(0,0,0,0.92);
+    border: 1px solid var(--orange);
+    border-radius: 1vw;
+    padding: 2vh 2vw;
+    font-size: 1.1vw;
+    color: var(--fg);
+    z-index: 20;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .speaker.show { display: block; }
+  .speaker h4 { color: var(--orange); margin-bottom: 1vh; font-size: 1.2vw; }
+  .speaker ul { margin-left: 1.5vw; }
+  .speaker li { font-size: 1vw; margin: 0.4vh 0; padding-left: 1.5vw; }
+  .speaker li::before { font-size: 0.9vw; }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 1. Title -->
+  <section class="slide center">
+    <p class="badge">VCN #32 · Frontier Tower SF</p>
+    <h1>Trading agents <br/>on <span class="orange">superhero.com</span></h1>
+    <p class="muted" style="margin-top:4vh; font-size:1.5vw;">
+      michalis · <code>vibecodingnights.chain</code>
+    </p>
+    <div class="speaker">
+      <h4>Speaker (60s):</h4>
+      <ul>
+        <li>Welcome — VCN #32, smaller crew tonight, intentional. Workshop, not lecture.</li>
+        <li>By the end of the night you walk out with a running agent. Not a tutorial — a thing on-chain with your name on it.</li>
+        <li>Co-hosts: Eric, Devinder, Rayyan, Yani — flag who's where in the room, who can help debug.</li>
+        <li>House rules: laptops open, ask anything, demo gods are real, fail loud.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. Promise -->
+  <section class="slide center">
+    <h2>By <span class="orange">21:00</span> tonight</h2>
+    <p style="font-size:2.4vw; line-height:1.5; max-width:80vw;">
+      You'll have <span class="cyan">your own agent</span><br/>
+      posting and trading<br/>
+      on æternity mainnet.
+    </p>
+    <p class="muted" style="margin-top:4vh; font-size:1.3vw;">
+      Real wallet · real on-chain · ~5 AE starter funded by us
+    </p>
+    <div class="speaker">
+      <h4>Speaker (45s):</h4>
+      <ul>
+        <li>This is the deal. You bring laptop + 90 mins. We hand you a wallet, a skill, and a strategy.</li>
+        <li>You leave with an agent that fires on a cron and shows up on the leaderboard.</li>
+        <li>Only thing you need installed: Claude Code + Node. We'll help with the rest.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. What is superhero.com -->
+  <section class="slide">
+    <p class="badge cyan">CONTEXT</p>
+    <h2>What is <span class="orange">superhero.com</span>?</h2>
+    <div class="grid grid-2" style="margin-top:3vh;">
+      <div>
+        <h3>Social network</h3>
+        <p>Posts + tips + comments — but every action is a transaction on æternity. No platform owns your content.</p>
+      </div>
+      <div>
+        <h3>Token market</h3>
+        <p>Every trend / community has a <span class="cyan">bonding-curve token</span>. Buy a topic, ride momentum, sell when it fades.</p>
+      </div>
+      <div>
+        <h3>On-chain identity</h3>
+        <p><code>.chain</code> names. 13+ chars = instant. <code>≤12</code> = auction.</p>
+      </div>
+      <div>
+        <h3>Open API</h3>
+        <p><code>api.superhero.com</code> — no auth for reads. Trending feed is a single GET.</p>
+      </div>
+    </div>
+    <div class="speaker">
+      <h4>Speaker (90s):</h4>
+      <ul>
+        <li>Built on æternity (FATE VM, sealed-bid AENS auctions, oracle-friendly). Not Ethereum, not Solana — it's its own thing.</li>
+        <li>Bonding curve = price is a pure function of supply. <code>price(n)</code> is a view call. No order book, no AMM pool.</li>
+        <li>Round-trip cost ~1.55% (curve spread + buy premium + sell discount + gas). Break-even TP starts there.</li>
+        <li>Affiliation rebate: 1% — but only via <code>CommunityFactory.create_community</code>. Direct path reverts. (We'll come back to this.)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. Why this market -->
+  <section class="slide">
+    <p class="badge">LIVE SNAPSHOT</p>
+    <h2>The market <span class="orange">today</span></h2>
+    <p class="muted" style="font-size:1.4vw; margin-top:-1vh; margin-bottom:1vh;">
+      Pulled live from <code>api.superhero.com</code> · 2026-04-27.
+    </p>
+    <div class="grid grid-3" style="margin-top:3vh;">
+      <div class="card">
+        <div class="stat">22,472</div>
+        <div class="stat-label">tokens launched on-chain</div>
+      </div>
+      <div class="card">
+        <div class="stat">48</div>
+        <div class="stat-label">active traders, last 7 days</div>
+      </div>
+      <div class="card">
+        <div class="stat">+47.9%</div>
+        <div class="stat-label">top trader 7-day ROI</div>
+      </div>
+      <div class="card">
+        <div class="stat">10–25k</div>
+        <div class="stat-label">AE traded per day</div>
+      </div>
+      <div class="card">
+        <div class="stat">17–19</div>
+        <div class="stat-label">UTC peak window</div>
+      </div>
+      <div class="card">
+        <div class="stat">~30–60</div>
+        <div class="stat-label">trades per day baseline</div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:3vh; font-size:1.3vw;">
+      Real PnL, real momentum. <span class="cyan">A focused agent shows up on the leaderboard fast</span>.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (75s):</h4>
+      <ul>
+        <li>All numbers verified live from api.superhero.com on 2026-04-27 — refresh the day of the event.</li>
+        <li>Refresh commands: <code>curl -s https://api.superhero.com/api/analytics | tail</code> · <code>curl -s 'https://api.superhero.com/api/accounts/leaderboard?limit=20'</code> · paginate to confirm active-trader count.</li>
+        <li>Framing: opportunity-positive, momentum-positive. Top trader +47.9% in a week is a real story.</li>
+        <li>Don't quote market cap — the public API returns market caps in aettos units that look misleadingly huge if shown raw.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. The trick -->
+  <section class="slide center">
+    <p class="badge cyan">THE TRICK</p>
+    <h2>You don't write the agent.</h2>
+    <h2 style="color:var(--orange); margin-top:0;">Claude does.</h2>
+    <p style="margin-top:4vh; font-size:1.6vw; max-width:70vw; text-align:center;">
+      <code>superhero-skill</code> is a Claude Code skill.<br/>
+      Install it, talk to Claude, your agent runs.
+    </p>
+    <div class="grid grid-3" style="margin-top:5vh; max-width:80vw;">
+      <div class="card cyan">
+        <h3>Wallet</h3>
+        <p>Generate or import. Claude exports the env var, you back up the key.</p>
+      </div>
+      <div class="card cyan">
+        <h3>Strategy</h3>
+        <p>Three presets baked in. Or describe yours in English.</p>
+      </div>
+      <div class="card cyan">
+        <h3>Schedule</h3>
+        <p>Cron-based. Posts + trades on independent timers.</p>
+      </div>
+    </div>
+    <div class="speaker">
+      <h4>Speaker (60s):</h4>
+      <ul>
+        <li>This is the leverage move. Skill = a folder of scripts + guides Claude reads. You don't write JS, you describe behavior.</li>
+        <li>Skill handles: wallet gen, on-chain naming, posting, token creation, buying/selling, portfolio, transactions, autonomous loops.</li>
+        <li>Switching strategy = one sentence. "Go aggressive" → Claude updates HEARTBEAT.md → next cycle uses new params.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. Live demo -->
+  <section class="slide center">
+    <p class="badge">LIVE DEMO</p>
+    <h2>Meet <code style="font-size:3.6vw; background:none; border:none; color:var(--orange);">vibecodingnights.chain</code></h2>
+    <p style="font-size:1.5vw; max-width:70vw; margin-top:3vh;">
+      Running on a GCP free-tier VM since 2026-04-22.<br/>
+      Fires every <code>:07</code> and <code>:37</code> UTC.<br/>
+      Watch a cycle decide in real time.
+    </p>
+    <p class="muted" style="margin-top:5vh; font-size:1.2vw;">
+      <span class="kbd">→</span> switch to terminal for live demo
+    </p>
+    <div class="speaker">
+      <h4>Demo script (8 min):</h4>
+      <ul>
+        <li>Pane 1: <code>systemctl list-timers superhero-alpha.timer</code> — show next firing time.</li>
+        <li>Pane 2: <code>cat ~/superhero-skill/state/positions.json</code> — current positions, entry prices.</li>
+        <li>Pane 3: <code>journalctl -u superhero-alpha.service -n 40</code> — last cycle's decisions.</li>
+        <li>Pane 4: browser → <code>superhero.com/users/vibecodingnights.chain</code> — public profile.</li>
+        <li>Force a cycle: <code>sudo systemctl start superhero-alpha.service</code> — let them watch the agent decide live.</li>
+        <li>Backup screenshot if wifi flakes: <code>/screenshots/cycle-output.png</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7. Tonight in 4 steps -->
+  <section class="slide">
+    <p class="badge">YOUR TURN</p>
+    <h2>Tonight in <span class="orange">4 steps</span></h2>
+    <ul class="big-list" style="margin-top:3vh;">
+      <li><span class="step-num">1</span> Install the skill</li>
+      <li><span class="step-num">2</span> Generate a wallet, get funded</li>
+      <li><span class="step-num">3</span> Pick mode: <span class="cyan">manual</span> or <span class="cyan">autonomous</span></li>
+      <li><span class="step-num">4</span> Pick a strategy, let it rip</li>
+    </ul>
+    <p class="muted" style="margin-top:4vh; font-size:1.3vw;">
+      Estimated time: 15 min. We're in the room — flag a host if stuck.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (30s):</h4>
+      <ul>
+        <li>Mention: pair up if you've never touched a terminal. Hosts circulate.</li>
+        <li>Hard requirement: laptop with Node 20+ and Claude Code. Anyone missing either, raise hand now.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. Step 1: Install -->
+  <section class="slide">
+    <p class="badge cyan">STEP 1 / 4</p>
+    <h2>Install the skill</h2>
+    <pre><span class="cmt"># Claude Code — clone into your skills dir</span>
+git clone https://github.com/VibeCodingNights/superhero-skill <span class="str">~/.claude/skills/superhero</span>
+cd ~/.claude/skills/superhero && npm install
+
+<span class="cmt"># OpenClaw alternative</span>
+npx clawhub@latest install superhero</pre>
+    <p style="margin-top:2vh; font-size:1.4vw;">
+      That's it. Open Claude Code and say <span class="cyan">"set up the superhero skill"</span> — it walks you through wallet, .chain name, and strategy.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (60s) + troubleshooting:</h4>
+      <ul>
+        <li>If they don't have Claude Code installed: <code>npm i -g @anthropic-ai/claude-code</code> then sign in.</li>
+        <li>If <code>npm install</code> fails: usually node version. <code>node -v</code> needs to be 20+.</li>
+        <li>The skill is <code>~/.claude/skills/superhero/SKILL.md</code> — Claude Code auto-detects it once placed there.</li>
+        <li>If the GitHub URL needs updating, point them to the bit.ly we'll share in the deck.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9. Step 2: Wallet -->
+  <section class="slide">
+    <p class="badge cyan">STEP 2 / 4</p>
+    <h2>Wallet + funding</h2>
+    <div class="grid grid-2" style="margin-top:2vh;">
+      <div>
+        <h3>Generate</h3>
+<pre>node scripts/superhero-wallet.mjs <span class="key">generate</span>
+
+<span class="cmt"># outputs:</span>
+<span class="cmt"># AE_PRIVATE_KEY: sk_...</span>
+<span class="cmt"># address: ak_...</span>
+
+<span class="cmt"># persist for the session</span>
+export AE_PRIVATE_KEY=sk_...</pre>
+      </div>
+      <div>
+        <h3>Fund</h3>
+        <p style="font-size:1.4vw;">
+          <span class="orange">→ Send your <code>ak_...</code> address to a host</span><br/>
+          We send you ~5 AE to play with.
+        </p>
+        <p class="muted" style="font-size:1.2vw; margin-top:2vh;">
+          Or bridge from another wallet. AE is on Coinbase, MEXC, Gate.
+        </p>
+        <h3 style="margin-top:3vh;">Get a name</h3>
+        <pre style="font-size:1.1vw;">node scripts/superhero-name.mjs <span class="key">register</span> <span class="str">myagentname</span>
+<span class="cmt"># 13+ chars = instant, no auction</span></pre>
+      </div>
+    </div>
+    <div class="speaker">
+      <h4>Speaker (90s):</h4>
+      <ul>
+        <li><strong>Wallet security disclaimer:</strong> the secret key is shown ONCE. They paste it into env, that's it. Don't commit.</li>
+        <li>Funding: we have a host wallet ready. Quick line for sending — Eric or me.</li>
+        <li>Name length: 13+ chars instant. 12 or less = auction = takes hours, costs more. Steer them to long names.</li>
+        <li>Suggest names that match their handle so leaderboard recognition compounds.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10. Step 3: Mode -->
+  <section class="slide">
+    <p class="badge cyan">STEP 3 / 4</p>
+    <h2>Manual or autonomous?</h2>
+    <div class="grid grid-2" style="margin-top:3vh;">
+      <div class="card">
+        <h3>Manual</h3>
+        <p style="margin-bottom:1.5vh;">Claude scans, recommends, waits for your "yes" before each trade.</p>
+        <p class="muted" style="font-size:1.1vw;">Best if: first time, want to learn the mechanics, only here for tonight.</p>
+      </div>
+      <div class="card accent">
+        <h3 class="orange">Autonomous</h3>
+        <p style="margin-bottom:1.5vh;">Claude runs on a cron, posts and trades without prompting. Strategy-driven.</p>
+        <p class="muted" style="font-size:1.1vw;">Best if: you want to leave it running for a week and check back.</p>
+      </div>
+    </div>
+    <p style="margin-top:4vh; font-size:1.4vw;">
+      Either way: <code>HEARTBEAT.md</code> stores your config.<br/>
+      Switch any time by talking to Claude.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (45s):</h4>
+      <ul>
+        <li>For tonight: most should pick <strong>manual</strong> first to see what the agent decides, then flip to autonomous before they leave.</li>
+        <li>Autonomous + GCP / a cheap VPS = a real always-on agent. We can help with deploy after the workshop.</li>
+        <li>HEARTBEAT.md is just a markdown file — Claude reads it every session. Editable by hand or by asking.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 11. Step 4: Strategy -->
+  <section class="slide">
+    <p class="badge cyan">STEP 4 / 4</p>
+    <h2>Pick a strategy</h2>
+    <div class="grid grid-3" style="margin-top:2vh;">
+      <div class="card">
+        <h3 class="green">Conservative</h3>
+        <p style="font-size:1.1vw;"><strong>5%</strong> per trade · max <strong>3</strong> positions<br/>
+        sell on <strong>−5%</strong> · hold <strong>3</strong> cycles</p>
+        <p class="muted" style="font-size:1vw; margin-top:1vh;">cron <code>0 */6 * * *</code></p>
+      </div>
+      <div class="card cyan">
+        <h3 class="cyan">Moderate ★</h3>
+        <p style="font-size:1.1vw;"><strong>10%</strong> per trade · max <strong>5</strong> positions<br/>
+        sell on <strong>−12%</strong> · hold <strong>6</strong> cycles</p>
+        <p class="muted" style="font-size:1vw; margin-top:1vh;">cron <code>0 */4 * * *</code> · default</p>
+      </div>
+      <div class="card accent">
+        <h3 class="orange">Aggressive</h3>
+        <p style="font-size:1.1vw;"><strong>20%</strong> per trade · max <strong>7</strong> positions<br/>
+        sell on <strong>−20%</strong> · hold <strong>12</strong> cycles</p>
+        <p class="muted" style="font-size:1vw; margin-top:1vh;">cron <code>0 */2 * * *</code></p>
+      </div>
+    </div>
+    <p style="margin-top:3vh; font-size:1.4vw;">
+      Or describe your own: <span class="cyan">"only trade tokens older than 24h with at least 5 holders, exit at +7% or after 2 hours"</span>
+    </p>
+    <div class="speaker">
+      <h4>Speaker (60s):</h4>
+      <ul>
+        <li>Default recommendation tonight: <strong>Moderate</strong>. Survives a single bad pick, still moves enough to feel real.</li>
+        <li>Real talk: my own bot runs <strong>+7 / −3 / 16-cycle / 1 position</strong>. I tuned this against a 1:4 R:R audit. The presets are starting points, not gospel.</li>
+        <li>Don't chase Aggressive on 5 AE — drawdown will end the session.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 12. Lessons -->
+  <section class="slide">
+    <p class="badge">LESSONS, FAST</p>
+    <h2>What I learned <br/>so you don't have to</h2>
+    <div class="grid grid-2" style="margin-top:2vh;">
+      <div>
+        <h3>1.55% round-trip cost</h3>
+        <p style="font-size:1.3vw;">Spread + buy premium + sell discount + gas. Anything below this TP is a guaranteed loss.</p>
+      </div>
+      <div>
+        <h3>Affiliation is a trap</h3>
+        <p style="font-size:1.3vw;">1% rebate ONLY via <code>create_community</code>. Direct buy reverts. Spammer found this; you won't farm it.</p>
+      </div>
+      <div>
+        <h3>Trending score lags</h3>
+        <p style="font-size:1.3vw;">Backend-aggregated. The leading indicator is the raw tx feed. Watch <code>scripts/superhero-transactions.mjs</code>.</p>
+      </div>
+      <div>
+        <h3>Whales fire on schedule</h3>
+        <p style="font-size:1.3vw;">Daily DCA at 17:00 UTC. Currently <span class="red">−3,584 AE</span> underwater. Don't be the whale.</p>
+      </div>
+      <div>
+        <h3>Concentration > diversification</h3>
+        <p style="font-size:1.3vw;">On a 16-real-token market, holding 5 positions = holding noise. 1–2 conviction picks beats spray.</p>
+      </div>
+      <div>
+        <h3>Hold longer than feels right</h3>
+        <p style="font-size:1.3vw;">4-cycle exits ate every gain. 16 cycles lets you ride into the 17:00 UTC window.</p>
+      </div>
+    </div>
+    <div class="speaker">
+      <h4>Speaker (90s):</h4>
+      <ul>
+        <li>These are scars. First config: +3/-5/2-pos/4-cycle. R:R 1:4 needed 80% hit rate. Lost 5.41 AE on first cycle.</li>
+        <li>The platform is too small to "diversify". You will own a slice of garbage if you spread to 5.</li>
+        <li>Trending score is a great filter, terrible signal. Use raw tx feed + holder count for entries.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 13. Build something weird -->
+  <section class="slide">
+    <p class="badge">CHALLENGES</p>
+    <h2>Now build <span class="orange">something weird</span></h2>
+    <ul class="big-list" style="margin-top:3vh;">
+      <li><strong>Social → market loop:</strong> post about a token before buying it. Did your post move the price?</li>
+      <li><strong>Copy-fish:</strong> watch <code>ak_3yT4Bo…</code> (the only profitable trader). Mirror their buys with delay.</li>
+      <li><strong>Peak-hour exit:</strong> never check the dashboard. Sell every position at 18:00 UTC, regardless.</li>
+      <li><strong>Anti-meme:</strong> post a cynical comment under every token launch. Track if your audience grows.</li>
+    </ul>
+    <p class="muted" style="margin-top:3vh; font-size:1.2vw;">
+      Show & tell at <span class="cyan">20:40</span>. Best weird wins a beer.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (45s):</h4>
+      <ul>
+        <li>The presets are floor. The interesting work is composing posting + trading + commenting into a behavior nobody else has.</li>
+        <li>Encourage non-trading agents too — pure social agents (post + tip + comment) are valid here.</li>
+        <li>Show & tell: 1–2 mins per builder, what they made + what surprised them.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 14. Resources -->
+  <section class="slide">
+    <p class="badge cyan">RESOURCES</p>
+    <h2>Take this with you</h2>
+    <ul style="margin-top:3vh;">
+      <li><strong>Skill repo:</strong> <code>github.com/VibeCodingNights/superhero-skill</code></li>
+      <li><strong>Slides:</strong> <code>github.com/VibeCodingNights/vcn-32-slides</code></li>
+      <li><strong>Live leaderboard:</strong> <code>vibecodingnights.com/superhero</code></li>
+      <li><strong>Platform docs:</strong> <code>aeternity.com</code> · <code>api.superhero.com</code></li>
+      <li><strong>VCN community:</strong> <code>vibecodingnights.com</code> · next event posted on Luma</li>
+      <li><strong>Frontier Tower membership:</strong> <code>frontiertower.io/apply</code></li>
+      <li><strong>Hosts:</strong> Michalis · Eric · Devinder · Rayyan · Yani</li>
+    </ul>
+    <p style="margin-top:4vh; font-size:1.3vw;" class="muted">
+      Stay after — I'll help anyone who wants their agent on a VPS.
+    </p>
+    <div class="speaker">
+      <h4>Speaker (30s):</h4>
+      <ul>
+        <li>Repo URLs need to be live before doors open — check before kickoff.</li>
+        <li>Plug VCN community: SF-only as of now, ~300 members. Vouch-based. Apply via vibecodingnights.com.</li>
+        <li>Tease next event topic if known.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 15. End -->
+  <section class="slide center">
+    <h1>Build the agent <br/>that moves <span class="orange">trends</span>.</h1>
+    <p style="margin-top:5vh; font-size:1.6vw;" class="muted">
+      Let's go. Pop your laptops.<br/>
+      Hosts are circling — flag us anytime.
+    </p>
+    <p style="margin-top:6vh; font-size:1.2vw;" class="muted">
+      <code>vibecodingnights.chain</code> · <code>@memehalis</code>
+    </p>
+    <div class="speaker">
+      <h4>Closing (15s):</h4>
+      <ul>
+        <li>Workshop block starts. Music up. Hosts roam.</li>
+        <li>Snap a group photo around 20:30 for the VCN feed.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer">
+  <span><span class="kbd">←</span> <span class="kbd">→</span> navigate · <span class="kbd">N</span> notes · <span class="kbd">F</span> fullscreen</span>
+  <span id="counter">1 / 15</span>
+</div>
+<div class="progress" id="progress" style="width:0%"></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let i = 0;
+  let notesOn = false;
+
+  function render() {
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    counter.textContent = `${i + 1} / ${slides.length}`;
+    progress.style.width = `${((i + 1) / slides.length) * 100}%`;
+    document.querySelectorAll('.speaker').forEach(el => el.classList.toggle('show', notesOn && slides[i].contains(el)));
+  }
+
+  function go(delta) {
+    i = Math.max(0, Math.min(slides.length - 1, i + delta));
+    render();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { i = 0; render(); }
+    else if (e.key === 'End') { i = slides.length - 1; render(); }
+    else if (e.key.toLowerCase() === 'n') { notesOn = !notesOn; render(); }
+    else if (e.key.toLowerCase() === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.speaker')) return;
+    const x = e.clientX / window.innerWidth;
+    go(x > 0.5 ? 1 : -1);
+  });
+
+  render();
+</script>
+
+</body>
+</html>
