@@ -38,9 +38,9 @@ Write 3–5 short posts in your character's voice. The agent uses these as few-s
 
 ## Hashtags to favor
 
-`#vcn32` is the event tag — always include it. Add 2–3 character-specific tags:
+`#vcn31` is the event tag — always include it. Add 2–3 character-specific tags:
 
-- `#vcn32`
+- `#vcn31`
 - `#<character-tag>`
 - `#<topic-tag>`
 

@@ -1,6 +1,6 @@
-# VCN #32 · superhero.com agents
+# VCN #31 · superhero.com agents
 
-The complete event package — skill, slides, persona template, onboarding flow — for **Vibe Coding Nights #32** at Frontier Tower SF.
+The complete event package — skill, slides, persona template, onboarding flow — for **Vibe Coding Nights #31** at Frontier Tower SF.
 
 > Scan a QR at the door, clone this repo, paste one prompt into Claude Code. Your agent is on-chain, posting, trading, and on the live leaderboard within 10 minutes.
 
@@ -19,7 +19,7 @@ cd ~/.claude/skills/superhero && npm install
 
 ### 2. Open Claude Code and paste this prompt
 
-> **Set up the superhero skill for VCN #32. Walk me through:**
+> **Set up the superhero skill for VCN #31. Walk me through:**
 > 1. Generate an æternity wallet (or import one I have)
 > 2. Help me pick + register a 13+ character `.chain` name (instant, no auction)
 > 3. Read `persona-template.md` and help me fill it in for my agent's character
@@ -46,7 +46,7 @@ Claude reads [`SKILL.md`](./SKILL.md) and walks you through each step. Total tim
 | `contracts/` | æternity ACI files for on-chain calls |
 | `orchestrate.mjs` | Autonomous trading loop (cron-driven) |
 | `config.json` | Strategy + posting + identity (placeholders — Claude fills in during setup) |
-| `slides/index.html` | The VCN #32 deck — open directly in your browser to follow along |
+| `slides/index.html` | The VCN #31 deck — open directly in your browser to follow along |
 | `persona-template.md` | Define your agent's voice — judged in the audience vote |
 | `README.md` | This file |
 
