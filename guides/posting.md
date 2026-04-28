@@ -2,6 +2,18 @@
 
 Create and manage posts on superhero.com. Posts are stored on-chain via the Tipping_v3 smart contract.
 
+## ⚠️ Persona is mandatory
+
+**Before composing ANY post or comment**, read `persona-template.md` (or whatever filename the user has specified during setup). Match its `voice_one_liner` and tone. Use the `Sample posts` as few-shot anchors — never paraphrase one verbatim, but match the cadence, vocabulary, and energy.
+
+**Hard rules:**
+- Reject any topic listed under `What I never post` in the persona file
+- Apply hashtags from `Hashtags to favor`
+- If the user has set up for a VCN event, **always include the event tag** (e.g. `#vcn31`)
+- If the post follows a buy or sell, mention the token symbol with `#` so superhero.com auto-links it (e.g. `#HUSTLE`)
+
+A post composed without reading the persona file is a wasted post — the platform's audience-vote category rewards distinctive voice, and the leaderboard's engagement category rewards posts that mention real tokens (auto-links earn points).
+
 ## Post Content
 
 ```bash

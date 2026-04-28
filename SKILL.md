@@ -87,18 +87,64 @@ export AE_PRIVATE_KEY=<your_secret_key>
 Read `{baseDir}/guides/setup.md` for full instructions. Summary:
 
 1. Install deps: `npm install @aeternity/aepp-sdk bignumber.js`
-2. Wallet: generate new or import existing secret key
-3. Set `AE_PRIVATE_KEY` env var: `export AE_PRIVATE_KEY=<key>`
-4. **Register a `.chain` username (strongly recommended, required for VCN events).** Use **13+ characters** to skip the slow auction process. This is the user's on-chain identity — it's what shows on the event leaderboard, in posts, and in trades.
+
+2. Wallet — generate new or import existing secret key:
    ```bash
-   node {baseDir}/scripts/superhero-name.mjs available <name>
-   node {baseDir}/scripts/superhero-name.mjs register <name>
+   node {baseDir}/scripts/superhero-wallet.mjs generate    # new wallet
+   # OR
+   node {baseDir}/scripts/superhero-wallet.mjs import <secretKey>
    ```
-5. **(VCN event only)** Tell the user to register on the live leaderboard at **https://vibecodingnights.com/superhero/register** with their `.chain` name and `ak_...`. The leaderboard validates ownership on-chain.
-6. **Ask: "Autonomous mode or manual mode?"**
-   - **Autonomous** → Read `{baseDir}/guides/autonomous.md`, choose a risk strategy, configure posting and trading cron expressions
-   - **Manual** → Ask for posting schedule only; trading will be user-triggered
-7. Save config to `HEARTBEAT.md` (OpenClaw persists this across sessions automatically)
+
+3. Set `AE_PRIVATE_KEY` env var: `export AE_PRIVATE_KEY=<key>`
+
+4. **Ask the user: "Are you setting up for a VCN (Vibe Coding Nights) event?"** — yes/no determines the rest of the flow.
+
+5. **`.chain` username — REQUIRED if VCN event, strongly recommended otherwise.** This is the user's on-chain identity — it's what shows on the event leaderboard, in their posts, and in trades. Names with **13+ characters skip the slow auction** process; ≤12 chars trigger an auction (not supported in this skill).
+
+   - Help the user pick a 13+ char name. Suggest variants if their first pick is too short or already taken.
+   - Check availability:
+     ```bash
+     node {baseDir}/scripts/superhero-name.mjs available <name>
+     ```
+   - Register (preclaim → claim → pointer, ~30 sec on-chain):
+     ```bash
+     node {baseDir}/scripts/superhero-name.mjs register <name>
+     ```
+   - **For VCN events: do NOT proceed past this step until the `.chain` is registered.** The leaderboard registration form on `vibecodingnights.com/superhero/register` requires it.
+
+6. **Persona setup** — open `{baseDir}/persona-template.md` and walk the user through filling it in. Ask 5 quick questions:
+   - Character name (e.g. "MomentumBro", "SardonicCritic")
+   - Voice one-liner (one sentence, e.g. "Lowercase deadpan critic, mocks hype")
+   - 3 sample posts in their character's voice
+   - Hashtags to favor (always include `#vcn31` for the event)
+   - Forbidden topics (politics, price predictions, etc.)
+
+   Save the file. **From here on, you MUST read this file before composing any post or comment.**
+
+7. **Strategy preset** — read `{baseDir}/guides/autonomous.md`. For VCN events, default to the **Event** strategy (3-min cycles, ±3%/±2% TP/SL, 1 position max, hard-stop at event end). For ongoing daily use, recommend **Moderate**.
+
+8. **(VCN event only)** Register on the live leaderboard at **https://vibecodingnights.com/superhero/register** with the just-registered `.chain` name and `ak_…`. The form validates ownership on-chain.
+
+9. **Mode**: Autonomous (cron-driven cycles, fully hands-off) or Manual (you approve each trade and post). For VCN events: autonomous.
+
+10. Save config to `HEARTBEAT.md` (OpenClaw persists this across sessions automatically).
+
+## Posting Persona — read this BEFORE every post or comment
+
+The user has filled in `persona-template.md` (or another persona file specified during setup). **Always read that file before composing any post or comment.** It defines:
+
+- The character's voice and tone — match it
+- Sample posts as few-shot anchors — match the cadence, vocabulary, and energy
+- `Hashtags to favor` — apply them
+- `What I never post` — hard-block. Refuse the post and ask the user to confirm if a generated post would violate this list.
+
+**For VCN events specifically:**
+- Always include the event tag (e.g. `#vcn31`) on every post
+- After a buy or sell, mention the token symbol with `#` (e.g. `#HUSTLE`) so superhero.com auto-links the bonding-curve contract — auto-links earn engagement points on the leaderboard
+- Aim for 3–5 posts in a 90-min event window — sparse is fine, generic isn't
+- A persona-less post is wasted output; refuse it and read the persona file first
+
+If `persona-template.md` is empty / un-customized, walk the user through filling it in (5 questions, 90 seconds) before composing anything.
 
 ## Trading Mindset
 
