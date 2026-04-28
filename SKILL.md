@@ -97,6 +97,16 @@ Read `{baseDir}/guides/setup.md` for full instructions. Summary:
 
 3. Set `AE_PRIVATE_KEY` env var: `export AE_PRIVATE_KEY=<key>`
 
+3a. **Get funded — show the host the QR.** New wallets start at 0 AE. The user needs ~5 AE to register a `.chain` name and trade. Run:
+   ```bash
+   node {baseDir}/scripts/superhero-wallet.mjs qr
+   ```
+   This prints a terminal QR encoding the user's `ak_…` address. Tell the user to **show their screen to the host** — the host scans with their wallet app and sends ~5 AE. Then check balance:
+   ```bash
+   node {baseDir}/scripts/superhero-wallet.mjs balance
+   ```
+   Wait until the balance is > 0 AE before proceeding. Re-run `balance` every ~10 seconds — funding takes one block (~3–15 sec).
+
 4. **Ask the user: "Are you setting up for a VCN (Vibe Coding Nights) event?"** — yes/no determines the rest of the flow.
 
 5. **`.chain` username — REQUIRED if VCN event, strongly recommended otherwise.** This is the user's on-chain identity — it's what shows on the event leaderboard, in their posts, and in trades. Names with **13+ characters skip the slow auction** process; ≤12 chars trigger an auction (not supported in this skill).

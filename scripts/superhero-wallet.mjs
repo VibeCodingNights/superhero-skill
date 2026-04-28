@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Wallet management for superhero.com / æternity blockchain
-// Generate new wallet, check balance, export address
+// Generate new wallet, check balance, export address, render fund-me QR
 import { AeSdk, Node, MemoryAccount } from '@aeternity/aepp-sdk';
+import qrcode from 'qrcode-terminal';
 
 const NODE_URL = 'https://mainnet.aeternity.io';
 
@@ -64,6 +65,24 @@ function importWallet(secretKey) {
   }));
 }
 
+function showFundQr(address) {
+  const target = address || (process.env.AE_PRIVATE_KEY ? new MemoryAccount(process.env.AE_PRIVATE_KEY).address : null);
+  if (!target) {
+    console.error('Usage: node scripts/superhero-wallet.mjs qr [ak_address]');
+    console.error('  (or set AE_PRIVATE_KEY env var to use your own wallet)');
+    process.exit(1);
+  }
+  // Stderr for the human-friendly text — keeps stdout clean if anyone parses it.
+  console.error(`\nFund me: ${target}\n`);
+  console.error('Scan this with the host\'s wallet app to send AE.');
+  console.error('After they send, run "node scripts/superhero-wallet.mjs balance" to confirm.\n');
+  qrcode.generate(target, { small: true }, (qr) => {
+    process.stderr.write(qr + '\n');
+  });
+  // stdout: just the address as JSON, in case a script wants to capture it
+  console.log(JSON.stringify({ address: target }));
+}
+
 async function main() {
   const command = process.argv[2] || 'help';
   const arg = process.argv[3];
@@ -81,6 +100,9 @@ async function main() {
     case 'import':
       importWallet(arg);
       break;
+    case 'qr':
+      showFundQr(arg);
+      break;
     case 'exists':
       console.log(JSON.stringify({ exists: !!process.env.AE_PRIVATE_KEY }));
       break;
@@ -92,6 +114,8 @@ Wallet Commands:
   import <secretKey>    Show setup instructions for an existing secret key
   balance               Check wallet AE balance  (requires AE_PRIVATE_KEY env var)
   address               Show wallet address      (requires AE_PRIVATE_KEY env var)
+  qr [ak_address]       Print a terminal QR code so a host can scan + send AE
+                        (uses AE_PRIVATE_KEY's wallet by default, or pass an ak_…)
   exists                Check if AE_PRIVATE_KEY env var is set
 
 Environment:
