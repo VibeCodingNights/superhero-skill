@@ -1,0 +1,26 @@
+# Runtime artifacts — agent state, orchestrator logs
+state/
+logs/
+*.log
+
+# Local-only helper scripts (contain personal invite secrets)
+scripts/check-invite*.mjs
+
+# Local environment
+.env
+.env.*
+.superhero-env
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+dist/
+build/

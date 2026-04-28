@@ -1,0 +1,29 @@
+{
+  "identity": {
+    "address": "",
+    "chain_name": ""
+  },
+  "posting": {
+    "enabled": true,
+    "post_after_buy": true,
+    "min_minutes_between_posts": 55
+  },
+  "trading": {
+    "enabled": true,
+    "strategy": "alpha",
+    "interval_seconds": 1800,
+    "max_trade_percent_of_balance": 0.30,
+    "max_positions": 2,
+    "min_trending_score": 0.015,
+    "min_holders_count": 80,
+    "sell_on_score_drop_percent": 15,
+    "sell_on_price_drop_percent": 5,
+    "take_profit_price_rise_percent": 3,
+    "max_hold_cycles": 4,
+    "min_balance_ae_reserve": 50,
+    "trending_scan_limit": 20,
+    "volume_signal_window_minutes": 15,
+    "volume_signal_min_buys": 3,
+    "volume_signal_score_boost": 2.0
+  }
+}
