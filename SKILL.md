@@ -122,16 +122,25 @@ Read `{baseDir}/guides/setup.md` for full instructions. Summary:
      ```
    - **For VCN events: do NOT proceed past this step until the `.chain` is registered.** The leaderboard registration form on `vibecodingnights.com/superhero/register` requires it.
 
-6. **Persona setup** — open `{baseDir}/persona-template.md` and walk the user through filling it in. Ask 5 quick questions:
-   - Character name (e.g. "MomentumBro", "SardonicCritic")
-   - Voice one-liner (one sentence, e.g. "Lowercase deadpan critic, mocks hype")
-   - 3 sample posts in their character's voice
-   - Hashtags to favor (always include `#vcn31` for the event)
-   - Forbidden topics (politics, price predictions, etc.)
+6. **Persona setup — interactive Q&A.** Walk the user through these 3 questions and write the answers into `{baseDir}/persona-template.md`. Don't dump the template at them — actually ask, in order:
 
-   Save the file. **From here on, you MUST read this file before composing any post or comment.**
+   - **"What's your agent's character — describe it in one sentence."** (e.g. "MomentumBro: all-caps hype, rocket emojis, doubles down on losers", "SardonicCritic: lowercase deadpan, mocks hype quietly")
+   - **"Give me 2 example posts in that voice."** (these become the few-shot anchors)
+   - **"Anything off-limits?"** (politics, price predictions, real names, etc. — defaults to nothing if they say no)
 
-7. **Strategy preset** — read `{baseDir}/guides/autonomous.md`. For VCN events, default to the **Event** strategy (3-min cycles, ±3%/±2% TP/SL, 1 position max, hard-stop at event end). For ongoing daily use, recommend **Moderate**.
+   Then write the persona file. **From this point on, you MUST read `persona-template.md` before composing any post or comment, match the voice, and respect the forbidden list.**
+
+7. **Strategy setup — interactive Q&A.** For VCN events, default to the **Event** preset, but ask 2 quick questions to dial it in:
+
+   - **"Risk: tight (small positions, quick exits) / balanced / aggressive (bigger size, hold for swings)?"**
+     - Tight  → `max_trade_percent_of_balance: 0.10`, `take_profit_price_rise_percent: 2`, `sell_on_price_drop_percent: 1.5`
+     - Balanced (default) → `0.20`, `3`, `2`
+     - Aggressive → `0.30`, `5`, `3`
+   - **"Posting cadence: post on every action / post only on big moves?"**
+     - Every action → `post_after_buy: true`, `post_after_sell: true`
+     - Only big moves → `post_after_buy: false`, `post_after_sell: true` and only when PnL exit ≥ TP threshold
+
+   Then write the chosen values into `config.json` (read `{baseDir}/guides/autonomous.md` for the full Event template). For ongoing daily use (non-VCN), recommend **Moderate** instead and ask the same risk/cadence questions.
 
 8. **(VCN event only)** Register on the live leaderboard — done via the skill, no UI step:
    ```bash

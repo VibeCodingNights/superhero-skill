@@ -2,7 +2,12 @@
 // Wallet management for superhero.com / æternity blockchain
 // Generate new wallet, check balance, export address, render fund-me QR
 import { AeSdk, Node, MemoryAccount } from '@aeternity/aepp-sdk';
-import qrcode from 'qrcode-terminal';
+import qrcodeTerminal from 'qrcode-terminal';
+import QRCode from 'qrcode';
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 
 const NODE_URL = 'https://mainnet.aeternity.io';
 
@@ -65,22 +70,57 @@ function importWallet(secretKey) {
   }));
 }
 
-function showFundQr(address) {
+async function showFundQr(address) {
   const target = address || (process.env.AE_PRIVATE_KEY ? new MemoryAccount(process.env.AE_PRIVATE_KEY).address : null);
   if (!target) {
     console.error('Usage: node scripts/superhero-wallet.mjs qr [ak_address]');
     console.error('  (or set AE_PRIVATE_KEY env var to use your own wallet)');
     process.exit(1);
   }
+
   // Stderr for the human-friendly text — keeps stdout clean if anyone parses it.
   console.error(`\nFund me: ${target}\n`);
-  console.error('Scan this with the host\'s wallet app to send AE.');
+  console.error("Scan this with the host's wallet app to send AE.");
   console.error('After they send, run "node scripts/superhero-wallet.mjs balance" to confirm.\n');
-  qrcode.generate(target, { small: true }, (qr) => {
-    process.stderr.write(qr + '\n');
+
+  // 1. Terminal QR (works in any shell, no GUI needed)
+  await new Promise((resolve) => {
+    qrcodeTerminal.generate(target, { small: true }, (qr) => {
+      process.stderr.write(qr + '\n');
+      resolve();
+    });
   });
-  // stdout: just the address as JSON, in case a script wants to capture it
-  console.log(JSON.stringify({ address: target }));
+
+  // 2. Big PNG saved to a temp file, auto-opened on desktop
+  const pngPath = path.join(os.tmpdir(), `vcn-fundme-${target.slice(3, 11)}.png`);
+  let pngOpened = false;
+  try {
+    await QRCode.toFile(pngPath, target, {
+      width: 600,
+      margin: 3,
+      color: { dark: '#000000', light: '#ffffff' },
+    });
+    const opener =
+      process.platform === 'darwin' ? 'open' :
+      process.platform === 'win32' ? 'start' :
+      'xdg-open';
+    const child = spawn(opener, [pngPath], {
+      detached: true,
+      stdio: 'ignore',
+      ...(process.platform === 'win32' ? { shell: true } : {}),
+    });
+    child.unref();
+    pngOpened = true;
+    console.error(`(opened ${pngPath} for the host to scan)\n`);
+  } catch (e) {
+    console.error(`(could not auto-open PNG: ${e.message} — terminal QR above still works)\n`);
+  }
+
+  // stdout: structured for any script consumer
+  console.log(JSON.stringify({
+    address: target,
+    png_path: pngOpened ? pngPath : null,
+  }));
 }
 
 async function main() {

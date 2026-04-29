@@ -6,6 +6,7 @@
   "dependencies": {
     "@aeternity/aepp-sdk": "^14.1.0",
     "bignumber.js": "^10.0.2",
+    "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0"
   },
   "skill": {
