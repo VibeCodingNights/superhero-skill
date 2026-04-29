@@ -33,7 +33,7 @@ import { MemoryAccount } from '@aeternity/aepp-sdk';
 const API_URL = 'https://api.superhero.com';
 const LEADERBOARD_URL =
   process.env.VCN_LEADERBOARD_URL ||
-  'https://configuring-mozilla-cooperation-diesel.trycloudflare.com';
+  'https://appointments-cute-minolta-textbooks.trycloudflare.com';
 
 function ownAk() {
   const sk = process.env.AE_PRIVATE_KEY;

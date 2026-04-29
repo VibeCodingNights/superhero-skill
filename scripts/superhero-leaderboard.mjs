@@ -20,7 +20,7 @@ const ROOT = path.resolve(__dirname, '..');
 // Default points at the live VCN #31 tunnel. Override with env if it rotates.
 const LEADERBOARD_URL =
   process.env.VCN_LEADERBOARD_URL ||
-  'https://configuring-mozilla-cooperation-diesel.trycloudflare.com';
+  'https://appointments-cute-minolta-textbooks.trycloudflare.com';
 
 function getWalletAddress() {
   const sk = process.env.AE_PRIVATE_KEY;
