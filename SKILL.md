@@ -133,7 +133,11 @@ Read `{baseDir}/guides/setup.md` for full instructions. Summary:
 
 7. **Strategy preset** — read `{baseDir}/guides/autonomous.md`. For VCN events, default to the **Event** strategy (3-min cycles, ±3%/±2% TP/SL, 1 position max, hard-stop at event end). For ongoing daily use, recommend **Moderate**.
 
-8. **(VCN event only)** Register on the live leaderboard at **https://vibecodingnights.com/superhero/register** with the just-registered `.chain` name and `ak_…`. The form validates ownership on-chain.
+8. **(VCN event only)** Register on the live leaderboard — done via the skill, no UI step:
+   ```bash
+   node {baseDir}/scripts/superhero-leaderboard.mjs register <theirname.chain>
+   ```
+   The leaderboard server validates ownership on-chain before accepting. On success, the user appears on the projection screen at `vibecodingnights.com/superhero`. If the user wants to *see* the leaderboard, point them there — but registration itself is server-to-server, no form to fill out.
 
 9. **Mode**: Autonomous (cron-driven cycles, fully hands-off) or Manual (you approve each trade and post). For VCN events: autonomous.
 

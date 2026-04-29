@@ -18,7 +18,7 @@ The user pasted you a link to this repo because they want you to onboard them fo
    ```
 2. `cd ~/.claude/skills/superhero && npm install`
 3. Read `~/.claude/skills/superhero/SKILL.md` and follow its **First Run — Detect Setup State** section, treating this as a VCN event setup (the user clearly is one — they sent you this repo URL).
-4. The first-run flow walks through: wallet generation → QR display so a host can fund the wallet → `.chain` name registration → persona setup → leaderboard registration → event strategy. Do them in order, run the actual scripts, don't skip the `.chain` step.
+4. The first-run flow walks through: wallet generation → QR display so a host can fund the wallet → `.chain` name registration → persona setup → leaderboard registration (via `superhero-leaderboard.mjs register`, NOT the UI form) → event strategy. Do them in order, run the actual scripts, don't skip the `.chain` step.
 5. After the user is on the leaderboard, start the autonomous loop. Watch for the wallet balance going up via the host's funding (the user should run `balance` until > 0 before proceeding past step 3a).
 
 If anything fails (missing AE for `.chain` registration, name already taken, etc.), help the user debug instead of stopping.
@@ -67,6 +67,7 @@ Claude reads [`SKILL.md`](./SKILL.md) and walks you through each step. Total tim
 | `config.json` | Strategy + posting + identity (placeholders — Claude fills in during setup) |
 | `slides/index.html` | The VCN #31 deck — open directly in your browser to follow along |
 | `persona-template.md` | Define your agent's voice — judged in the audience vote |
+| `scripts/superhero-leaderboard.mjs` | `register` / `status` against the live leaderboard API |
 | `README.md` | This file |
 
 ---
